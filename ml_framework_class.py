@@ -9,10 +9,8 @@ from math import sqrt
 class Git:
     def __init__(self, link):
         self.link = link.replace("\n", "")
-        try:
-            self.api_link = self.get_api_link()
-        except:
-            return
+
+        self.api_link = self.get_api_link()
         response = self.get_json()
         self.name = response["name"]
         self.stars = response["stargazers_count"]
@@ -22,8 +20,16 @@ class Git:
         
         self.contributors = self.get_contributors()
 
-        
-        
+    @property
+    def value(self):
+        vector_length = sqrt(self.stars**2
+                             + self.watch**2
+                             + self.forks**2
+                             + self.contributors**2)
+        return int(vector_length)
+
+
+    
     def get_json(self):
         r = requests.get(self.api_link).text
         response = json.loads(r)
@@ -47,22 +53,13 @@ class Git:
         pattern = re.compile("github.com/.*/.*")
         wo_http=(wo_http[0] if len(wo_http) == 1 else wo_http[1])
         if pattern.match(wo_http):
-            
             s = wo_http.split("/")
             return "http://api.github.com/repos/" + s[-2] + "/" + s[-1]
         else:
             raise RuntimeError("Invalid Github link.")
 
-        
-    
-    @property
-    def value(self):
-        vector_length = sqrt(self.stars**2
-                             + self.watch**2
-                             + self.forks**2
-                             + self.contributors**2)
-        return int(vector_length)
-
+    def __lt__(self, other):
+        return (True if self.value < other.value else False)
 
     def __str__(self):
         return ("Name: " + self.name + "\n"
@@ -76,12 +73,17 @@ class Git:
                 "\nVector length: " + str(self.value))
 
     
+    def toJSON(self):
+        return dict(self.__dict__, value=self.value)
+    
 if __name__ == "__main__":
     project_list = []
     with open('project_links', 'r')  as f:
         for line in f:
             project_list.append(Git(line))
 
-    for p in project_list:
-        print(p)
+    project_list = sorted(project_list, reverse=True)
+    with open("sorted.json", "w") as f:
+        f.write(json.dumps([x.toJSON() for x in project_list], indent=4))
+        
     
