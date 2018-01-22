@@ -16,9 +16,11 @@ class Git:
         self.stars = response["stargazers_count"]
         self.watch = response["subscribers_count"]
         self.forks = response["forks_count"]
-        self.license = response["license"]['name']
-        
         self.contributors = self.get_contributors()
+        
+        self.license = response["license"]['name']
+        self.update_date = time.asctime()
+        
 
     @property
     def value(self):
