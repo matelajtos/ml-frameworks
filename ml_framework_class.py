@@ -7,18 +7,18 @@ from math import sqrt
 
 
 class Git:
-    def __init__(self, link):
+    def __init__(self, link, api_link=None, name=None, stars=None, watch=None, forks=None, contributors=None, lic=None, update_date=None):
         self.link = link.replace("\n", "")
 
-        self.api_link = self.get_api_link()
-        response = self.get_json()
+        self.api_link = (self.get_api_link() if not api_link else api_link)
+        response = requests.get(self.api_link).json()
         self.name = response["name"]
         self.stars = response["stargazers_count"]
         self.watch = response["subscribers_count"]
         self.forks = response["forks_count"]
         self.contributors = self.get_contributors()
         
-        self.license = response["license"]['name']
+        self.lic = response["license"]['name']
         self.update_date = time.asctime()
         
 
@@ -29,13 +29,6 @@ class Git:
                              + self.forks**2
                              + self.contributors**2)
         return int(vector_length)
-
-
-    
-    def get_json(self):
-        r = requests.get(self.api_link).text
-        response = json.loads(r)
-        return response
 
     
     def get_contributors(self):
