@@ -1,26 +1,23 @@
 import requests
-import json
 import re
 import time
-import csv
 from math import sqrt
 
 
 class Git:
-    def __init__(self, link, api_link=None, name=None, stars=None, watch=None, forks=None, contributors=None, lic=None, update_date=None):
+    def __init__(self, link):
         self.link = link.replace("\n", "")
-
-        self.api_link = (self.get_api_link() if not api_link else api_link)
+        self.api_link = self.get_api_link()
+        
         response = requests.get(self.api_link).json()
+        
         self.name = response["name"]
         self.stars = response["stargazers_count"]
         self.watch = response["subscribers_count"]
         self.forks = response["forks_count"]
-        self.contributors = self.get_contributors()
-        
+        self.contributors = self.get_contributors()        
         self.lic = response["license"]['name']
         self.update_date = time.asctime()
-        
 
     @property
     def value(self):
@@ -29,27 +26,24 @@ class Git:
                              + self.forks**2
                              + self.contributors**2)
         return int(vector_length)
-
     
     def get_contributors(self):
-        contributors = ''
-        f = requests.get(self.link).text.split("\n")
-        for i, row in enumerate(f):
-            if row.find('graphs/contributors') != -1: 
-                contributors = f[i+3]
+        contributor_link = self.api_link + "/contributors?per_page=1&anon=1"
+        response = requests.get(contributor_link).headers["Link"]
 
-        contributors = contributors.replace(',', '')
-        return int(contributors)
+        pattern = r'(\d+)>; rel="last"'
+        contributors = re.search(pattern, response)
 
-        
-        
+        if contributors:
+            return int(contributors.group(1))
+        else:
+            raise RuntimeError("Contributors have not been found.")  
+
     def get_api_link(self):
-        wo_http=self.link.split("//")
-        pattern = re.compile("github.com/.*/.*")
-        wo_http=(wo_http[0] if len(wo_http) == 1 else wo_http[1])
-        if pattern.match(wo_http):
-            s = wo_http.split("/")
-            return "http://api.github.com/repos/" + s[-2] + "/" + s[-1]
+        pattern = r'github.com/([^/]*/[^/]*)'
+        user_repo = re.search(pattern, self.link)
+        if user_repo:
+            return "http://api.github.com/repos/" + user_repo.group(1)
         else:
             raise RuntimeError("Invalid Github link.")
 
@@ -67,18 +61,18 @@ class Git:
                 "License: " + self.license + "\n"
                 "\nVector length: " + str(self.value))
 
-    
     def toJSON(self):
         return dict(self.__dict__, value=self.value)
-    
+
+
 if __name__ == "__main__":
+    import json
     project_list = []
     with open('project_links', 'r')  as f:
         for line in f:
             project_list.append(Git(line))
 
     project_list = sorted(project_list, reverse=True)
-    with open("sorted.json", "w") as f:
-        f.write(json.dumps([x.toJSON() for x in project_list], indent=4))
+    print(json.dumps([x.toJSON() for x in project_list], indent=4))
         
     
