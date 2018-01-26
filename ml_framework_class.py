@@ -37,8 +37,9 @@ class MLFramework:
         return int(vector_length)
     
     def get_contributor_count(self):
-        contributor_link = self.api_link + "/contributors?per_page=1&anon=1"
-        response = requests.get(contributor_link).headers["Link"]
+        contributor_link = self.api_link + "/contributors"
+        payload = {"per_page": 1, "anon": 1}
+        response = requests.get(contributor_link, params=payload).headers["Link"]
 
         pattern = r'(\d+)>; rel="last"'
         contributors = re.search(pattern, response)
@@ -58,7 +59,7 @@ class MLFramework:
             raise MLFramework.InvalidLinkException("Invalid Github link: " + self.link)
 
     def __lt__(self, other):
-        return True if self.score < other.value else False
+        return True if self.score < other.score else False
 
     def __str__(self):
         return ("Name: " + self.name + "\n"
