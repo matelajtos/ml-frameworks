@@ -10,7 +10,7 @@ class MLFramework:
         self.api_link = self.create_api_link()
         
         response = requests.get(self.api_link).json()
-        
+        print(response)
         self.name = response["name"]
         self.star_count = response["stargazers_count"]
         self.watch_count = response["subscribers_count"]
@@ -20,7 +20,7 @@ class MLFramework:
         self.update_date = time.asctime()
 
     @property
-    def value(self):
+    def score(self):
         vector_length = sqrt(self.star_count**2
                              + self.watch_count**2
                              + self.fork_count**2
@@ -48,7 +48,7 @@ class MLFramework:
             raise RuntimeError("Invalid Github link.")
 
     def __lt__(self, other):
-        return True if self.value < other.value else False
+        return True if self.score < other.value else False
 
     def __str__(self):
         return ("Name: " + self.name + "\n"
@@ -58,11 +58,11 @@ class MLFramework:
                                 + "\t  watch: " + str(self.watch_count) + "\n"
                                 + "\t  forks: " + str(self.fork_count) + "\n"
                                 + "\t  contributors: " + str(self.contributor_count) + "\n\t}\n"
-                "License: " + self.license + "\n"
-                "\nVector length: " + str(self.value))
+                "License: " + self.lic + "\n"
+                "\nVector length: " + str(self.score))
 
-    def toJSON(self):
-        return dict(self.__dict__, value=self.value)
+    def to_json(self):
+        return dict(self.__dict__, score=self.score)
 
 
 if __name__ == "__main__":
@@ -73,5 +73,5 @@ if __name__ == "__main__":
             project_list.append(MLFramework(line))
 
     project_list = sorted(project_list, reverse=True)
-    print(json.dumps([x.toJSON() for x in project_list], indent=4))
+    print(json.dumps([x.to_json() for x in project_list], indent=4))
 
