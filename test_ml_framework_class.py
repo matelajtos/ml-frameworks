@@ -1,53 +1,49 @@
 import unittest
-from ml_framework_class import Git
+from ml_framework_class import MLFramework
 from math import sqrt
 
+
 class GithubTestCase(unittest.TestCase):
-    
+
     @classmethod
     def setUpClass(cls):
-        cls.git_1 = Git('https://github.com/tensorflow/tensorflow')
-        cls.git_2 = Git('http://github.com/BVLC/caffe')
-        cls.git_3 = Git('https://github.com/opencv/opencv')
+        cls.mlf_1 = MLFramework('https://github.com/tensorflow/tensorflow')
+        cls.mlf_2 = MLFramework('http://github.com/BVLC/caffe')
+        cls.mlf_3 = MLFramework('https://github.com/opencv/opencv')
 
     def test_get_api_link(self):
-        self.assertEqual(self.git_1.get_api_link(), 'http://api.github.com/repos/tensorflow/tensorflow')
-        self.git_1.link = 'https://google.com' 
-        self.assertRaises(RuntimeError, self.git_1.get_api_link)
+        self.assertEqual(self.mlf_1.create_api_link(), 'http://api.github.com/repos/tensorflow/tensorflow')
+        self.mlf_1.link = 'https://google.com'
+        self.assertRaises(RuntimeError, self.mlf_1.create_api_link)
 
-        self.assertEqual(self.git_2.get_api_link(), 'http://api.github.com/repos/BVLC/caffe')
-        self.assertEqual(self.git_3.get_api_link(), 'http://api.github.com/repos/opencv/opencv')
+        self.assertEqual(self.mlf_2.create_api_link(), 'http://api.github.com/repos/BVLC/caffe')
+        self.assertEqual(self.mlf_3.create_api_link(), 'http://api.github.com/repos/opencv/opencv')
         
     def test_get_contributors(self):
-        self.assertNotEqual(self.git_1.contributors, '')
-        self.assertTrue(self.git_1.contributors >= 0)
+        self.assertNotEqual(self.mlf_1.contributor_count, '')
+        self.assertTrue(self.mlf_1.contributor_count >= 0)
 
-        self.assertNotEqual(self.git_2.contributors, '')
-        self.assertTrue(self.git_2.contributors >= 0)
+        self.assertNotEqual(self.mlf_2.contributor_count, '')
+        self.assertTrue(self.mlf_2.contributor_count >= 0)
 
-        self.assertNotEqual(self.git_3.contributors, '')
-        self.assertTrue(self.git_3.contributors >= 0)
+        self.assertNotEqual(self.mlf_3.contributor_count, '')
+        self.assertTrue(self.mlf_3.contributor_count >= 0)
 
     def test_value(self):
-        self.assertEqual(self.git_1.value, int(sqrt(self.git_1.stars**2
-                                                 + self.git_1.watch**2
-                                                 + self.git_1.forks**2
-                                                 + self.git_1.contributors**2)))
+        self.assertEqual(self.mlf_1.value, int(sqrt(self.mlf_1.star_count**2
+                                                    + self.mlf_1.watch_count**2
+                                                    + self.mlf_1.fork_count**2
+                                                    + self.mlf_1.contributor_count**2)))
 
-        self.assertEqual(self.git_2.value, int(sqrt(self.git_2.stars**2
-                                                 + self.git_2.watch**2
-                                                 + self.git_2.forks**2
-                                                 + self.git_2.contributors**2)))
+        self.assertEqual(self.mlf_2.value, int(sqrt(self.mlf_2.star_count**2
+                                                    + self.mlf_2.watch_count**2
+                                                    + self.mlf_2.fork_count**2
+                                                    + self.mlf_2.contributor_count**2)))
 
-        self.assertEqual(self.git_3.value, int(sqrt(self.git_3.stars**2
-                                                 + self.git_3.watch**2
-                                                 + self.git_3.forks**2
-                                                 + self.git_3.contributors**2)))
-
-    def test_get_json(self):
-        self.assertTrue(len(self.git_1.get_json()) > 0)
-        self.assertTrue(len(self.git_2.get_json()) > 0)
-        self.assertTrue(len(self.git_3.get_json()) > 0)
+        self.assertEqual(self.mlf_3.value, int(sqrt(self.mlf_3.star_count**2
+                                                    + self.mlf_3.watch_count**2
+                                                    + self.mlf_3.fork_count**2
+                                                    + self.mlf_3.contributor_count**2)))
 
 
 if __name__ == '__main__':
