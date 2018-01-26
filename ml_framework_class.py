@@ -9,14 +9,23 @@ class MLFramework:
         self.link = link.replace("\n", "")
         self.api_link = self.create_api_link()
         
-        response = requests.get(self.api_link).json()
-        print(response)
-        self.name = response["name"]
-        self.star_count = response["stargazers_count"]
-        self.watch_count = response["subscribers_count"]
-        self.fork_count = response["forks_count"]
+        response = requests.get(self.api_link)
+        content = response.json()
+        if response.headers["status"] == "404 Not Found":
+            raise MLFramework.URLNotFoundException("URL: '" + self.api_link + "' was not found. (404)")
+        elif response.headers["status"] == "403 Forbidden":
+            raise MLFramework.RateLimitReachedException("GitHub didn't like that. Here's the error message: "
+                                                        + content["message"])
+        elif response.headers["status"] != "200 OK":
+            raise MLFramework.GitHubException("There was a problem contacting github.com. Response status: "
+                                              + response.headers["status"])
+
+        self.name = content["name"]
+        self.star_count = content["stargazers_count"]
+        self.watch_count = content["subscribers_count"]
+        self.fork_count = content["forks_count"]
         self.contributor_count = self.get_contributor_count()        
-        self.lic = response["license"]['name']
+        self.lic = content["license"]['name']
         self.update_date = time.asctime()
 
     @property
@@ -37,7 +46,8 @@ class MLFramework:
         if contributors:
             return int(contributors.group(1))
         else:
-            raise RuntimeError("Contributors have not been found.")  
+            raise MLFramework.ContributorCountException("Contributor count has not been found. " 
+                                                        "Link: " + contributor_link)
 
     def create_api_link(self):
         pattern = r'github.com/([^/]*/[^/]*)'
@@ -45,7 +55,7 @@ class MLFramework:
         if user_repo:
             return "http://api.github.com/repos/" + user_repo.group(1)
         else:
-            raise RuntimeError("Invalid Github link.")
+            raise MLFramework.InvalidLinkException("Invalid Github link: " + self.link)
 
     def __lt__(self, other):
         return True if self.score < other.value else False
@@ -63,6 +73,25 @@ class MLFramework:
 
     def to_json(self):
         return dict(self.__dict__, score=self.score)
+
+    class MLException(Exception):
+        """Base class for exceptions in MLFramework class"""
+        pass
+
+    class URLNotFoundException(MLException):
+        pass
+
+    class RateLimitReachedException(MLException):
+        pass
+
+    class GitHubException(MLException):
+        pass
+
+    class InvalidLinkException(MLException):
+        pass
+
+    class ContributorCountException(MLException):
+        pass
 
 
 if __name__ == "__main__":
