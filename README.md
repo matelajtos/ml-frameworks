@@ -68,15 +68,18 @@ The tool uses a number of different projects to work properly:
   
   - Using only this method, developers who committed anonymously will not be counted. For that the _anon_ parameter has to be set to 1.
   
-  Full example with Tensorflow:  
-  ```
-  https://api.github.com/repos/tensorflow/tensorflow/contributors?per_page=1&anon=1
-  ```
+    Full example with Tensorflow:  
+    ```
+    https://api.github.com/repos/tensorflow/tensorflow/contributors?per_page=1&anon=1
+    ```
 
   - [API rate limit](https://developer.github.com/v3/#rate-limiting): Without authentication the API lets at most 60 requests through an hour. With authentication the limit is increased to
     5000 request/hour. While 60 is not necessarily enough, 5000 should do the trick. For this, a shared GitHub account is required.  
   - **Authentication**: The recommended way is using the [OAuth](https://developer.github.com/v3/oauth_authorizations/#oauth-authorizations-api) protocol. For the time being we are going to use
     some other [authentication method](https://developer.github.com/v3/auth/#other-authentication-methods) for testing purposes, since the app is not yet running.
-	It is possible to use both _username:password_ and _username:token_ combinations. Out of the last two, token based authentication should be prioritized, because
-	using that the access scope can be set precisely.
-  - **Webhooks:** [Webhooks](https://developer.github.com/v3/repos/hooks/) are available through the API and they should be used as a trigger to the script running on the Azure servers. 
+	It is possible to use both _username:password_ and _username:token_ combinations. Out of the last two, token based authentication should be prioritized, because using that the access scope can be set precisely.  
+    The [Requests](http://docs.python-requests.org/en/master/) package supports an _'auth'_ parameter in every kind of request which expects a tuple containing a _usnername_ and a _password_.
+  - **Webhooks:** [Webhooks](https://developer.github.com/v3/repos/hooks/) are available through the API and they should be used as a trigger to the script running on the Azure servers to update the database containing the scores for the frameworks.  Authentication is mandatory when using webhooks. 
+  	- [List hooks](https://developer.github.com/v3/repos/hooks/#list-hooks): ``` GET /repos/:owner/:repo/hooks```
+  	- [Get single hook](https://developer.github.com/v3/repos/hooks/#get-single-hook): ``` GET /repos/:owner/:repo/hooks/:id```
+  	- [Create hook](https://developer.github.com/v3/repos/hooks/#create-a-hook): ```POST /repos/:owner/:repo/hooks``` (check link for details)
