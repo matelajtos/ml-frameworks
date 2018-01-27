@@ -36,7 +36,7 @@ The tool uses a number of different projects to work properly:
   - [GitHub API](https://developer.github.com/v3/) - GitHub's API. Used to access stats.
   - [Google Sheets API](https://developers.google.com/sheets/api/v3/) - Creating quick and easy Google spreadsheets. Temporary solution for display.
   - [D3.js](https://d3js.org/) - Other, more sustainable solution for data visualization.
-  - [Azure serverless](https://azure.microsoft.com/en-in/overview/serverless-computing/) - Azure cloud where the script will be running.
+  - [Azure functions](https://azure.microsoft.com/en-in/overview/serverless-computing/) - Azure cloud where the script will be running.
   - [Some database](#) - Storing the values with dates on Azure servers. (Undecided so far)
 
 ### Python packages
