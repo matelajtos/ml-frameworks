@@ -7,7 +7,7 @@ gc = pygsheets.authorize(outh_file='client_secret.json', no_cache=True)
 try:
     ws = gc.open('ml_frameworks').worksheet('index', 0)
 except pygsheets.SpreadsheetNotFound:
-    ss = gc.create('ml_frameworks').add_worksheet('ws1')
+    ss = gc.create('ml_frameworks').worksheet('index', 0)
     
 with open('sorted.json', 'r') as data_f:
     data = json.load(data_f)
