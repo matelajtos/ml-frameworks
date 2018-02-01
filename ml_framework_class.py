@@ -4,12 +4,29 @@ import time
 from math import sqrt
 
 
+def get_response(api_link):        
+    return requests.get(api_link)
+    
+def get_contributor_count(api_link):
+        contributor_link = api_link + "/contributors"
+        payload = {"per_page": 1, "anon": 1}
+        response = requests.get(contributor_link, params=payload).headers["Link"]
+
+        pattern = r'(\d+)>; rel="last"'
+        contributors = re.search(pattern, response)
+
+        if contributors:
+            return int(contributors.group(1))
+        else:
+            raise MLFramework.ContributorCountException("Contributor count has not been found. " 
+                                                        "Link: " + contributor_link)
+
 class MLFramework:
     def __init__(self, link):
         self.link = link.replace("\n", "")
         self.api_link = self.create_api_link()
         
-        response = requests.get(self.api_link)
+        response = get_response(self.api_link)
         content = response.json()
         if response.headers["status"] == "404 Not Found":
             raise MLFramework.URLNotFoundException("URL: '" + self.api_link + "' was not found. (404)")
@@ -24,7 +41,7 @@ class MLFramework:
         self.star_count = content["stargazers_count"]
         self.watch_count = content["subscribers_count"]
         self.fork_count = content["forks_count"]
-        self.contributor_count = self.get_contributor_count()        
+        self.contributor_count = get_contributor_count(self.api_link)        
         self.lic = content["license"]['name']
         self.update_date = time.asctime()
 
@@ -36,20 +53,7 @@ class MLFramework:
                              + self.contributor_count**2)
         return int(vector_length)
     
-    def get_contributor_count(self):
-        contributor_link = self.api_link + "/contributors"
-        payload = {"per_page": 1, "anon": 1}
-        response = requests.get(contributor_link, params=payload).headers["Link"]
-
-        pattern = r'(\d+)>; rel="last"'
-        contributors = re.search(pattern, response)
-
-        if contributors:
-            return int(contributors.group(1))
-        else:
-            raise MLFramework.ContributorCountException("Contributor count has not been found. " 
-                                                        "Link: " + contributor_link)
-
+    
     def create_api_link(self):
         pattern = r'github.com/([^/]*/[^/]*)'
         user_repo = re.search(pattern, self.link)
@@ -57,7 +61,7 @@ class MLFramework:
             return "http://api.github.com/repos/" + user_repo.group(1)
         else:
             raise MLFramework.InvalidLinkException("Invalid Github link: " + self.link)
-
+        
     def __lt__(self, other):
         return True if self.score < other.score else False
 
