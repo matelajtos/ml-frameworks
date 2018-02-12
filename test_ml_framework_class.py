@@ -23,8 +23,8 @@ def get_contributor_count(api_link):
         return json.load(f)[repo_name]
 
 
-ml_framework_class.get_response = get_response
-ml_framework_class.get_contributor_count = get_contributor_count
+ml_framework_class.MLFramework.get_response = get_response
+ml_framework_class.MLFramework.get_contributor_count = get_contributor_count
 
 
 class TestMLFramework(unittest.TestCase):
