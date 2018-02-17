@@ -1,83 +1,43 @@
-import requests
-import re
+from github import Github
 import time
+import re
 from math import sqrt
-
-
 
 
 class MLFramework:
     def __init__(self, link):
-        self.link = link.replace("\n", "")
-        self.api_link = self.create_api_link()
+        self.html_url = link.replace("\n", "")
+        self.full_name = self.get_full_name()
         
-        response = MLFramework.get_response(self.api_link)
-        content = response.json()
-        if response.headers["status"] == "404 Not Found":
-            raise MLFramework.URLNotFoundException("URL: '" + self.api_link + "' was not found. (404)")
-        elif response.headers["status"] == "403 Forbidden":
-            raise MLFramework.RateLimitReachedException("GitHub didn't like that. Here's the error message: "
-                                                        + content["message"])
-        elif response.headers["status"] != "200 OK":
-            raise MLFramework.GitHubException("There was a problem contacting github.com. Response status: "
-                                              + response.headers["status"])
+        gh = Github()
+        repo = gh.get_repo(self.full_name)
 
-        self.name = content["name"]
-        self.star_count = content["stargazers_count"]
-        self.watch_count = content["subscribers_count"]
-        self.fork_count = content["forks_count"]
-        self.contributor_count = MLFramework.get_contributor_count(self.api_link)        
-        self.lic = content["license"]['name']
+        self.api_url = repo.url
+        self.name = repo.name
+        self.stars_count = repo.stargazers_count
+        self.watchers_count = repo.subscribers_count
+        self.forks_count = repo.forks_count
+        self.contributors_count = repo.get_contributors_count()
         self.update_date = time.asctime()
 
-    @staticmethod
-    def get_response(api_link):
-        return requests.get(api_link)
-
-    @staticmethod
-    def get_contributor_count(api_link):
-        contributor_link = api_link + "/contributors"
-        payload = {"per_page": 1, "anon": 1}
-        response = requests.get(contributor_link, params=payload).headers["Link"]
-
-        pattern = r'(\d+)>; rel="last"'
-        contributors = re.search(pattern, response)
-
-        if contributors:
-            return int(contributors.group(1))
-        else:
-            raise MLFramework.ContributorCountException("Contributor count has not been found. " 
-                                                        "Link: " + contributor_link)
     @property
     def score(self):
-        vector_length = sqrt(self.star_count**2
-                             + self.watch_count**2
-                             + self.fork_count**2
-                             + self.contributor_count**2)
+        vector_length = sqrt(self.stars_count**2
+                             + self.watchers_count**2
+                             + self.forks_count**2
+                             + self.contributors_count**2)
         return int(vector_length)
-    
-    
-    def create_api_link(self):
+
+    def get_full_name(self):
         pattern = r'github.com/([^/]*/[^/]*)'
-        user_repo = re.search(pattern, self.link)
+        user_repo = re.search(pattern, self.html_url)
         if user_repo:
-            return "http://api.github.com/repos/" + user_repo.group(1)
+            return user_repo.group(1)
         else:
-            raise MLFramework.InvalidLinkException("Invalid Github link: " + self.link)
-        
+            raise MLFramework.InvalidLinkException("Invalid Github link: " + self.html_url)
+
     def __lt__(self, other):
         return True if self.score < other.score else False
-
-    def __str__(self):
-        return ("Name: " + self.name + "\n"
-                "Link: " + self.link + "\n"
-                "API link: " + self.api_link + "\n"
-                "Stats: \t{\n"  + "\t  stars: " + str(self.star_count) + "\n"
-                                + "\t  watch: " + str(self.watch_count) + "\n"
-                                + "\t  forks: " + str(self.fork_count) + "\n"
-                                + "\t  contributors: " + str(self.contributor_count) + "\n\t}\n"
-                "License: " + self.lic + "\n"
-                "\nVector length: " + str(self.score))
 
     def to_json(self):
         return dict(self.__dict__, score=self.score)
@@ -86,19 +46,7 @@ class MLFramework:
         """Base class for exceptions in MLFramework class"""
         pass
 
-    class URLNotFoundException(MLException):
-        pass
-
-    class RateLimitReachedException(MLException):
-        pass
-
-    class GitHubException(MLException):
-        pass
-
     class InvalidLinkException(MLException):
-        pass
-
-    class ContributorCountException(MLException):
         pass
 
 
