@@ -1,5 +1,6 @@
 import json
 import MLFramework
+import github
 import re
 
 def get_full_name(html_url):
@@ -12,6 +13,6 @@ def get_full_name(html_url):
 
 project_url = "https://github.com/tensorflow/tensorflow"
 project_fn = get_full_name(project_url)
-
-ml = MLFramework.MLFramework(project_fn)
-print(json.dumps(ml, indent=4))
+repo = github.Github().get_repo(project_fn)
+repo.__class__ = MLFramework.MLFramework
+print(json.dumps(repo.to_json(), indent=4))
