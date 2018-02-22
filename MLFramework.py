@@ -6,10 +6,7 @@ from math import sqrt
 
 class MLFramework(github.Repository.Repository):
     @property
-    def contributors_count(self):
-        return self.get_contributors_count()
-
-    def get_contributors_count(self, anon=1):
+    def contributors_count(self, anon=1):
         assert anon in (0, 1), anon
 
         contributors_list = github.PaginatedList.PaginatedList(
