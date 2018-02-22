@@ -1,5 +1,5 @@
 import unittest
-import ml_framework_class
+import MLFramework
 from math import sqrt
 import copy
 import requests
@@ -23,19 +23,19 @@ def get_contributor_count(api_link):
         return json.load(f)[repo_name]
 
 
-ml_framework_class.MLFramework.get_response = get_response
-ml_framework_class.MLFramework.get_contributor_count = get_contributor_count
+MLFramework.MLFramework.get_response = get_response
+MLFramework.MLFramework.get_contributor_count = get_contributor_count
 
 
 class TestMLFramework(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.c_mlf_1 = ml_framework_class.MLFramework('https://github.com/tensorflow/tensorflow')
-        cls.c_mlf_2 = ml_framework_class.MLFramework('http://github.com/BVLC/caffe')
-        cls.c_mlf_3 = ml_framework_class.MLFramework('https://github.com/opencv/opencv')
-        cls.c_mlf_4 = ml_framework_class.MLFramework('https://github.com/scikit-learn/scikit-learn')
-        cls.c_mlf_5 = ml_framework_class.MLFramework('https://github.com/keras-team/keras')
+        cls.c_mlf_1 = MLFramework.MLFramework('https://github.com/tensorflow/tensorflow')
+        cls.c_mlf_2 = MLFramework.MLFramework('http://github.com/BVLC/caffe')
+        cls.c_mlf_3 = MLFramework.MLFramework('https://github.com/opencv/opencv')
+        cls.c_mlf_4 = MLFramework.MLFramework('https://github.com/scikit-learn/scikit-learn')
+        cls.c_mlf_5 = MLFramework.MLFramework('https://github.com/keras-team/keras')
 
     @classmethod
     def tearDownClass(cls):
@@ -56,7 +56,7 @@ class TestMLFramework(unittest.TestCase):
     def test_create_api_link(self):
         self.assertEqual(self.mlf_1.create_api_link(), 'http://api.github.com/repos/tensorflow/tensorflow')
         self.mlf_1.link = 'https://google.com'
-        self.assertRaises(ml_framework_class.MLFramework.InvalidLinkException, self.mlf_1.create_api_link)
+        self.assertRaises(MLFramework.MLFramework.InvalidLinkException, self.mlf_1.create_api_link)
         
         self.assertEqual(self.mlf_2.create_api_link(), 'http://api.github.com/repos/BVLC/caffe')
         self.assertEqual(self.mlf_3.create_api_link(), 'http://api.github.com/repos/opencv/opencv')
