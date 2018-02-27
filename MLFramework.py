@@ -3,6 +3,7 @@ import ExtPaginatedList
 import time
 import copy
 import json
+from Vector import DictVector
 
 
 class MLFramework(github.Repository.Repository):
@@ -14,7 +15,13 @@ class MLFramework(github.Repository.Repository):
         return object.__new__(cls)
 
     def __init__(self, other):
-        pass
+        v = {
+             "stars_count": self.stargazers_count,
+             "watchers_count": self.subscribers_count,
+             "forks_count": self.forks_count,
+             "contributors_count": self.contributors_count
+            }
+        self.vector = DictVector(v)
 
     @property
     def contributors_count(self, anon=1):
@@ -27,23 +34,19 @@ class MLFramework(github.Repository.Repository):
             {'per_page': 1, 'anon': anon})
         return contributors_list.last_page_number
 
-    @property
-    def score(self):
-        vector = [self.stargazers_count, self.subscribers_count, self.forks_count, self.contributors_count]
-        return int(sum((x**2 for x in vector))**0.5)
 
-    def to_dict(self):
-        return dict(name = self.name,
-                    full_name = self.full_name,
-                    html_url = self.html_url,
-                    api_url = self.url,
-                    stars_count = self.stargazers_count,
-                    watchers_count = self.subscribers_count,
-                    forks_count = self.forks_count,
-                    contributors_count = self.contributors_count,
-                    update_date = time.asctime(),
-                    score=self.score
-                    )
-
-    def to_json(self):
-        return json.dumps(self.to_dict(), indent=4)
+class MLFrameworkEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, MLFramework):
+            ml = dict(name=o.name,
+                      full_name=o.full_name,
+                      html_url=o.html_url,
+                      api_url=o.url,
+                      vectors=[
+                          dict(update_date=o.vector.update_date,
+                               dict_vector=o.vector.dict_vector,
+                               score=len(o.vector)
+                               )
+                          ]
+                      )
+            return ml

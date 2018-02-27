@@ -17,13 +17,14 @@ def get_full_name(html_url):
     else:
         raise RuntimeError("Invalid Github link: " + html_url)
 
-postreqdata = json.loads(open(os.environ['req']).read())
-project_url = postreqdata['html_url']
-project_fn = get_full_name(project_url)
-# project_fn = get_full_name('https://github.com/tensorflow/tensorflow')
+# postreqdata = json.loads(open(os.environ['req']).read())
+# project_url = postreqdata['html_url']
+# project_fn = get_full_name(project_url)
+project_fn = get_full_name('https://github.com/tensorflow/tensorflow')
 repo = github.Github().get_repo(project_fn)
 repo = MLFramework.MLFramework(repo)
-
-response = open(os.environ['res'], 'w')
-response.write(repo.to_json())
-response.close()
+print(json.dumps(repo, cls=MLFramework.MLFrameworkEncoder, indent=4))
+#
+# response = open(os.environ['res'], 'w')
+# response.write(repo.to_json())
+# response.close()
