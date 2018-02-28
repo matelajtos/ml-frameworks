@@ -1,9 +1,8 @@
 import github
 import ExtPaginatedList
-import time
 import copy
 import json
-from Vector import DictVector
+from DictVector import DictVector
 
 
 class MLFramework(github.Repository.Repository):
@@ -14,7 +13,7 @@ class MLFramework(github.Repository.Repository):
             return other
         return object.__new__(cls)
 
-    def __init__(self, other):
+    def __init__(self, _):
         v = {
              "stars_count": self.stargazers_count,
              "watchers_count": self.subscribers_count,
@@ -45,8 +44,9 @@ class MLFrameworkEncoder(json.JSONEncoder):
                       vectors=[
                           dict(update_date=o.vector.update_date,
                                dict_vector=o.vector.dict_vector,
-                               score=len(o.vector)
-                               )
-                          ]
+                               score=len(o.vector))
+                               ]
                       )
             return ml
+        else:
+            return json.JSONEncoder.default(self, o)
