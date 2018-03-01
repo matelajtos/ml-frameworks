@@ -17,7 +17,7 @@ def get_full_name(html_url):
         return user_repo.group(1)
     else:
         raise RuntimeError("Invalid Github link: " + html_url)
-
+#
 # postreqdata = json.loads(open(os.environ['req']).read())
 # project_url = postreqdata['html_url']
 # project_fn = get_full_name(project_url)
@@ -26,28 +26,27 @@ uri = "mongodb://mlframeworks:R9bKTpQslRY6ta795mcOxHGIbRJemptvERK4afd40Bux2XqSjl
 client = pymongo.MongoClient(uri)
 
 db = client['admin']
-collection = db['test_new_format']
+collection = db['asd']
 
 project_list = []
-
+g = github.Github('524dd5997ebd951f42053a645bb7529625ee45a7')
 with open("project_links.json", "r") as f:
     project_links = json.load(f)
     for p in project_links:
-        print(p)
-        project_fn = get_full_name(p.replace("\n", ""))
-        repo = github.Github().get_repo(project_fn)
-        print(repo.__class__)
+        project_fn = get_full_name(p)
+        repo = g.get_repo(project_fn, False)
         repo = MLFramework.MLFramework(repo)
-        print(repo.__class__)
         project_list.append(repo)
-        #print(json.dumps(repo, cls=MLFramework.MLFrameworkEncoder, indent=4))
+        break
 
 print(project_list)
 
 for p in project_list:
-    dct = json.loads(json.dumps(p, cls=MLFramework.MLFrameworkEncoder))
-    post_id = collection.insert_one(dct).inserted_id
-# #
+    result = collection.update_one({"full_name": p.full_name}, {"$push": {"vectors": p.vector[0]}})
+    if result.modified_count == 0:
+        post_id = collection.insert_one(p).inserted_id
+
+    break
+
 # response = open(os.environ['res'], 'w')
-# response.write(repo.to_json())
 # response.close()

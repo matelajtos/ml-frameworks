@@ -20,7 +20,7 @@ class MLFramework(github.Repository.Repository):
              "forks_count": self.forks_count,
              "contributors_count": self.contributors_count
             }
-        self.vector = DictVector(v)
+        self.vector = [DictVector(v)]
 
     @property
     def contributors_count(self, anon=1):
