@@ -5,7 +5,7 @@ import MLFramework
 import github
 import re
 import pymongo
-
+import DictVector
 import os
 import json
 
@@ -29,12 +29,12 @@ db = client['admin']
 collection = db['asd']
 
 project_list = []
-g = github.Github('524dd5997ebd951f42053a645bb7529625ee45a7')
+g = github.Github()
 with open("project_links.json", "r") as f:
     project_links = json.load(f)
     for p in project_links:
         project_fn = get_full_name(p)
-        repo = g.get_repo(project_fn, False)
+        repo = g.get_repo(project_fn)
         repo = MLFramework.MLFramework(repo)
         project_list.append(repo)
         break
@@ -42,9 +42,9 @@ with open("project_links.json", "r") as f:
 print(project_list)
 
 for p in project_list:
-    result = collection.update_one({"full_name": p.full_name}, {"$push": {"vectors": p.vector[0]}})
+    result = collection.update_one({"full_name": p.full_name}, {"$push": {"vectors": p.vector.to_dict()}})
     if result.modified_count == 0:
-        post_id = collection.insert_one(p).inserted_id
+        post_id = collection.insert_one(p.to_dict()).inserted_id
 
     break
 

@@ -2,7 +2,7 @@ import github
 import ExtPaginatedList
 import copy
 import json
-from DictVector import DictVector
+import DictVector
 
 
 class MLFramework(github.Repository.Repository):
@@ -20,7 +20,7 @@ class MLFramework(github.Repository.Repository):
              "forks_count": self.forks_count,
              "contributors_count": self.contributors_count
             }
-        self.vector = [DictVector(v)]
+        self.vector = DictVector.DictVector(v)
 
     @property
     def contributors_count(self, anon=1):
@@ -33,20 +33,11 @@ class MLFramework(github.Repository.Repository):
             {'per_page': 1, 'anon': anon})
         return contributors_list.last_page_number
 
-
-class MLFrameworkEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, MLFramework):
-            ml = dict(name=o.name,
-                      full_name=o.full_name,
-                      html_url=o.html_url,
-                      api_url=o.url,
-                      vectors=[
-                          dict(update_date=o.vector.update_date,
-                               dict_vector=o.vector.dict_vector,
-                               score=len(o.vector))
-                               ]
-                      )
-            return ml
-        else:
-            return json.JSONEncoder.default(self, o)
+    def to_dict(self):
+        ml = dict(name=self.name,
+                  full_name=self.full_name,
+                  html_url=self.html_url,
+                  api_url=self.url,
+                  vectors=[self.vector.to_dict()]
+                  )
+        return ml

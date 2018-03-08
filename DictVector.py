@@ -1,4 +1,5 @@
 import time
+import json
 
 
 class DictVector:
@@ -8,3 +9,6 @@ class DictVector:
 
     def __len__(self):
         return int(sum([x ** 2 for x in self.dict_vector.values()]) ** 0.5)
+
+    def to_dict(self):
+        return dict(update_date=self.update_date, score=len(self), dict_vector=self.dict_vector)
