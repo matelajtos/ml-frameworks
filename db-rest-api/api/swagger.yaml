@@ -1,0 +1,241 @@
+---
+swagger: "2.0"
+info:
+  description: "This is a simple REST API service to store information for the [Machine\
+    \ Learning Frameworks]() project."
+  version: "0.0.1"
+  title: "mlf-db-rest-api"
+  contact:
+    email: "mate.labadi@t-systems.com"
+  license:
+    name: "Proprietary, internal use only for IT Services."
+    url: "https://appagile.io"
+host: "ml-frameworks.azurewebsites.net"
+basePath: "/api/v1"
+tags:
+- name: "timestamps"
+  description: "Contains all the timestamps for which metrics had been stored."
+- name: "snapshots"
+  description: "Contains all the snapshots containing the frameworks' metrics."
+- name: "frameworks"
+  description: "The collection of the scanned frameworks."
+schemes:
+- "https"
+paths:
+  /timestamps:
+    get:
+      tags:
+      - "timestamps"
+      summary: "List all the timestamps in chronological ascending order. Timestamps\
+        \ are populated automatically by the /snapshots PUT API."
+      operationId: "listTimestampsInOrder"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "Successful operation."
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/TimestampObject"
+        400:
+          description: "Error occured, maybe database access is broken."
+          schema:
+            $ref: "#/definitions/ApiResponse"
+      x-swagger-router-controller: "Timestamps"
+  /snapshots:
+    get:
+      tags:
+      - "snapshots"
+      summary: "List the metrics of the different frameworks belonging to the exact\
+        \ same timestamp."
+      operationId: "listSnapshots"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "A timestamp we are looking the metrics for."
+        required: true
+        schema:
+          $ref: "#/definitions/TimestampObject"
+      responses:
+        200:
+          description: "Successful operation."
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Snapshot"
+        400:
+          description: "Error occured, like no database access."
+          schema:
+            $ref: "#/definitions/ApiResponse"
+      x-swagger-router-controller: "Snapshots"
+    put:
+      tags:
+      - "snapshots"
+      summary: "Add a snapshot to the database, existent snapshots for the same framework\
+        \ and same time cannot be updated."
+      operationId: "addSnapshot"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Snapshot object that needs to be added to the database."
+        required: true
+        schema:
+          $ref: "#/definitions/Snapshot"
+      responses:
+        200:
+          description: "Successful operation."
+          schema:
+            $ref: "#/definitions/ApiResponse"
+        400:
+          description: "Error occured. For example no database access, framework not\
+            \ found or metrics already exist for the given framework at the given\
+            \ timestamp."
+          schema:
+            $ref: "#/definitions/ApiResponse"
+      x-swagger-router-controller: "Snapshots"
+  /frameworks:
+    put:
+      tags:
+      - "frameworks"
+      summary: "Add a new or update an existing framework in the database."
+      operationId: "addOrUpdateFramework"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Framework object that needs to be added to the database."
+        required: true
+        schema:
+          $ref: "#/definitions/Framework"
+      responses:
+        200:
+          description: "Successful operation."
+          schema:
+            $ref: "#/definitions/ApiResponse"
+        400:
+          description: "Error occured, like no database access."
+          schema:
+            $ref: "#/definitions/ApiResponse"
+      x-swagger-router-controller: "Frameworks"
+  /frameworks/{frameworkId}:
+    get:
+      tags:
+      - "frameworks"
+      summary: "Find framework by ID"
+      description: "Returns a single framework"
+      operationId: "getFrameworkById"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "frameworkId"
+        in: "path"
+        description: "ID of framework to return"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Successful operation."
+          schema:
+            $ref: "#/definitions/Framework"
+        400:
+          description: "Invalid ID supplied"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+        404:
+          description: "Framework not found"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+      x-swagger-router-controller: "Frameworks"
+definitions:
+  Metrics:
+    type: "object"
+    required:
+    - "contributors"
+    - "forks"
+    - "stars"
+    - "watchers"
+    properties:
+      contributors:
+        type: "integer"
+        format: "int32"
+      forks:
+        type: "integer"
+        format: "int32"
+      stars:
+        type: "integer"
+        format: "int32"
+      watchers:
+        type: "integer"
+        format: "int32"
+  TimestampObject:
+    type: "object"
+    properties:
+      timestamp:
+        $ref: "#/definitions/TimestampAttr"
+  TimestampAttr:
+    type: "string"
+    format: "date-time"
+    description: "Must be in [ISODate](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString)\
+      \ format."
+  Snapshot:
+    type: "object"
+    required:
+    - "frameworkId"
+    - "metrics"
+    - "timestamp"
+    properties:
+      frameworkId:
+        type: "string"
+      timestamp:
+        $ref: "#/definitions/TimestampAttr"
+      metrics:
+        $ref: "#/definitions/Metrics"
+    description: "An object describing the current metrics of the given framework\
+      \ at the given timestamp."
+  Framework:
+    type: "object"
+    required:
+    - "frameworkId"
+    - "name"
+    - "url"
+    properties:
+      frameworkId:
+        type: "string"
+        description: "The framework's unique id. This will identify the framework\
+          \ within the API. No two frameworks can exist with the same id."
+      name:
+        type: "string"
+        description: "The framework's name as shown on the website."
+      url:
+        type: "string"
+        description: "A simple url where the framework and it's code is available."
+      description:
+        type: "string"
+        description: "Describe what this framework is about."
+  ApiResponse:
+    type: "object"
+    required:
+    - "code"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+        description: "The error code. 0 means OK any other value indicates an error.\
+          \ You must check the message attribute in case of error."
+        minimum: 0
+        maximum: 100
+      message:
+        type: "string"
