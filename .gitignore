@@ -1,6 +1,0 @@
-*.json
-DSR.txt
-link_input.py
-__pycache__/
-venv/
-.idea/
