@@ -1,22 +1,28 @@
-# ML framework rating tool
-
-This project's goal is to provide an objective way of comparing [GitHub](https://github.com/) machine learning libraries based on their community size.
+# Machine Learning framework project documentation
 
 
-### Main goals
+### 1.Main goals of this project
+#### 1.1 Implemented goals
 
-  - Collect all of the most important machine learning libraries that are available on GitHub.
+  - Collect all of the most important machine learning libraries (tools, frameworks etc.) that are available on GitHub.
   - Calculate a score for each one based on the statistics (stars, watch, forks, contributors).
-  - Display them descending order in a visually pleasing manner.
   - Keep track of tendencies and be able to predict future alterations in popularity.
-  - Move the project to Microsoft Azure, where score updates would happen on some trigger.
+  - Move the project to **Microsoft Azure**, where score updates would happen on some trigger.
   
-Some more that we want to achieve later:
-  - Finer scoring system.
-  - Grouping by types of ML.
+#### 1.2 Opportunities for developing the project
+  
+  -Display frameworks descending order in a visually pleasing manner.
+  -Finer scoring system.
+  -ML grouping by types.
+  
+  
+  
 
 
-### The formula
+### Calculation of the score
+
+The score is calculated from stars, watch, forks and contributor numbers. The result is the length of a vector in a 4-dimensional space. After having calculated all of the needed vector lengths, normalized score can be computed that gives more of a comprehensible rank.
+
 The following formula gives the basis of comparison:
 
 <p align="center">
@@ -25,24 +31,55 @@ The following formula gives the basis of comparison:
 
 </p>
 
-Which basically represents the length of a vector in a 4 dimensional space, where the dimensions are the stats. This makes it easy to compare the different repositories.  
-After having calculated all of the needed vector lengths, normalized score can be computed that gives more of a comprehensible rank.
+
 
 ### Tech
 
-The tool uses a number of different projects to work properly:
+The project uses a number of different tools to work properly:
 
-  - [Python 3.6](https://www.python.org/) - Python programming language.
-  - [GitHub API](https://developer.github.com/v3/) - GitHub's API. Used to access stats.
-  - [Google Sheets API](https://developers.google.com/sheets/api/v3/) - Creating quick and easy Google spreadsheets. Temporary solution for display.
-  - [D3.js](https://d3js.org/) - Other, more sustainable solution for data visualization.
-  - [Azure functions](https://azure.microsoft.com/en-in/overview/serverless-computing/) - Azure cloud where the script will be running.
-  - [Some database](#) - Storing the values with dates on Azure servers. (Undecided so far)
+  - **[Python 3.6]**(https://www.python.org/) - Python programming language.
+  - **[Bit Bucket]** (https://bitbucket.org/miamanoteam/ml-frameworks/src/master/ and https://bitbucket.org/miamanoteam/framework-       collector/src/master/)-Version control system.  Every script and database is contained in a Bit Bucket repository. 
+  - **[GitHub API]**(https://developer.github.com/v3/) - Accessing stats.
+  -** [Google Sheets API]**(https://developers.google.com/sheets/api/v3/) - Creating quick and easy Google spreadsheets. 
+  - **[D3.js]**(https://d3js.org/) - Vizualization of data.  
+  -** [Azure functions]**(https://azure.microsoft.com/en-in/overview/serverless-computing/) - Azure cloud where the script will be running.
+  - [Some database](#) - Storing the values with dates on Azure servers. 
 
 ### Python packages
   - Maybe list them. Unimportant.
   
 ### Architecture
+
+There is a Python script **Collector** in our Azure account. It queries the current values and names of libraries from GitHub **API** once a week. It is unnecessary to query data every day, because it makes the downloading time longer and visualization works also properly on this way.  
+
+_Framework-collector link:_ https://bitbucket.org/miamanoteam/framework-collector/src/master/
+
+There is also a Web Application in Azure account which contains the **frontend**. Trends are visualized here.
+
+_Frontend link_: http://ml-frmwks.azurewebsites.net
+
+## Functions of frontend
+
+**API** runs also in Azure account. 
+
+It communicates with MySQL database and queries the data of snapshots, timestamps and frameworks. 
+
+The **Collector** sends the current values to API, which write theme to database. 
+
+_API.js code:_  https://bitbucket.org/miamanoteam/ml-frameworks/src/master/api.js
+
+_API documentation link:_  http://ml-frmwks.azurewebsites.net/api
+
+_MySQL Database link:_ https://bitbucket.org/miamanoteam/ml-frameworks/src/master/MySQL/localdb_with_data_20180620.sql
+
+
+
+
+
+
+
+
+
 
 #### GitHub API:
   - The API can be accessed by the following URL: [https://api.github.com/](https://api.github.com/).
