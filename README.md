@@ -27,10 +27,21 @@ The score is calculated from stars, watch, forks and contributor numbers. The re
 
 
 The following formula gives the basis of comparison:
-
 <p align="center">
 
-<img src="https://raw.githubusercontent.com/maraid/md_test/master/formula.png"/>
+<img src="https://latex.codecogs.com/svg.latex?\Large&space;score=\sqrt{s^2+w^2+f^2+c^2}}" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" />
+
+- _s_=stars number;
+
+- _w_=watch number;
+
+- _f_=forks number;
+
+- _c_=contributor number;
+
+
+
+
 
 </p>
 
