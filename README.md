@@ -144,6 +144,33 @@ The site has a lightweight backend also written in node.js, yet somewhat separat
 
 - **Frontend:** The frontend of the web app is written in html and javascript. Graphs and charts are made with D3.js, a javascript library for data visualization.
 
+#### Functions of **frontend**:
+
+
+
+![](https://ml-frmwks.azurewebsites.net/doc_pics/Picture_frontend_1.png)
+
+_Popularity of tools and frameworks are visualized with bubbles_
+
+<p align="center">
+
+![](https://ml-frmwks.azurewebsites.net/doc_pics/Picture_frontend_2.png) ![](https://ml-frmwks.azurewebsites.net/doc_pics/Picture_frontend_3.png)
+
+_You can check the historical popularity and fork, watch star and contributor numbers of every tool and framework_
+
+
+
+
+ ![](https://ml-frmwks.azurewebsites.net/doc_pics/Picture_frontend_4.png)
+ _Scores_
+
+
+
+
+![](https://ml-frmwks.azurewebsites.net/doc_pics/Picture_frontend_5.png)
+_Trend_
+
+
 
 _Frontend link_: http://ml-frmwks.azurewebsites.net
 
