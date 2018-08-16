@@ -1,15 +1,15 @@
 # Machine Learning framework project documentation
 
 
-### 1.Main goals of this project
-#### 1.1 Implemented goals
+## 1.Main goals of this project
+### 1.1 Implemented goals
 
   - Collect all of the most important machine learning libraries (tools, frameworks etc.) that are available on GitHub.
   - Calculate a score for each one based on the statistics (stars, watch, forks, contributors).
   - Keep track of tendencies and be able to predict future alterations in popularity.
   - Move the project to Microsoft Azure, where score updates would happen on some trigger.
   
-#### 1.2 Opportunities for developing the project
+### 1.2 Opportunities for developing the project
   
   - Display frameworks descending order in a visually pleasing manner.
   - Finer scoring system. 
@@ -19,9 +19,12 @@
   
 
 
-### Calculation of the score
+## 2.Calculation of the score
 
-The score is calculated from stars, watch, forks and contributor numbers. The result is the length of a vector in a 4-dimensional space. After having calculated all of the needed vector lengths, normalized score can be computed that gives more of a comprehensible rank.
+
+
+The score is calculated from stars, watch, forks and contributor numbers. The result is the length of a vector in a 4-dimensional space. After having calculated all of the needed vector lengths, normalized score can be computed that gives more of a comprehensible rank. 
+
 
 The following formula gives the basis of comparison:
 
@@ -33,7 +36,7 @@ The following formula gives the basis of comparison:
 
 
 
-### Tech
+## 3.Tech
 
 The project uses a number of different tools to work properly:
 
@@ -44,10 +47,10 @@ The project uses a number of different tools to work properly:
   - [Azure functions](https://azure.microsoft.com/en-in/overview/serverless-computing/) - Azure cloud where the script will be running.
   - [Some database](#) - Storing the values with dates on Azure servers. 
 
-### Python packages
+## 4.Python packages
   - Maybe list them. Unimportant.
   
-### Architecture
+## 5.Architecture
 
 The project has two major parts both running on **Microsoft Azure**.
 
@@ -55,7 +58,7 @@ The project has two major parts both running on **Microsoft Azure**.
 
 - The second part is a **web app**, that consist of a database with all the previously recorded data, an API providing access for the database and the frontend, that visualizes the findings.
 
-## Collector
+### 5.1Collector
 
 The **collector** is a Python script, running on an Azure function app. Every time it runs, it records the data needed for calculating the scores and uploads it to the database. The process goes as follows:
 
@@ -66,7 +69,7 @@ The **collector** is a Python script, running on an Azure function app. Every ti
 Code snippet:
 
 [
-
+```
 https://github.com/BVLC/caffe,
 
 https://github.com/opencv/opencv,
@@ -78,6 +81,7 @@ https://github.com/scikit-learn/scikit-learn,
 https://github.com/keras-team/keras,
 
 ...
+```
 ]
 
 - Using a **GitHub** module for Python the script gets the data about the certain repository. **GitHub** has its own API, although working directly with it provided good enough results, later we started using the github module for Python as a “middleware”, because it had proven to be easier and more stable.
@@ -88,48 +92,38 @@ https://github.com/keras-team/keras,
 - The data is then structured, so that it could be sent via a post request to the following access point of the API: 
 
 Code snippet:
-https://ml-frmwks.azurewebsites.net/api/insert
+
+```https://ml-frmwks.azurewebsites.net/api/insert```
 
 About authentication details could be found under the part concerning the API.	
 
-## Web App
+### 5.2Web App
 
 - **Database:** The project uses a MySql database that is included into the Azure web app, the project does not have its own SQL server, that has its pros and cons. The database has the following table structures:
 
 Code snippet:
-CREATE TABLE `frameworks` (
- `id` varchar(255) NOT NULL,
- 
- `url` varchar(255) DEFAULT NULL,
- 
- `name` varchar(255) DEFAULT NULL,
- 
- `repo_desc` text
- 
-);
 
-CREATE TABLE `snapshots` (
- `id` int(11) NOT NULL,
- 
- `timestamp` date DEFAULT NULL,
- 
- `framework_id` varchar(255) DEFAULT NULL,
- 
- `stars_count` int(11) DEFAULT NULL,
- 
- `contributors_count` int(11) DEFAULT NULL,
- 
- `forks_count` int(11) DEFAULT NULL,
- 
- `watchers_count` int(11) DEFAULT NULL
- 
-);
+```CREATE TABLE frameworks (
+ id varchar(255) NOT NULL,
+ url varchar(255) DEFAULT NULL,
+ name varchar(255) DEFAULT NULL,
+ repo_desc text
+ );
 
-CREATE TABLE `timestamps` (
+CREATE TABLE snapshots (
+ id int(11) NOT NULL,
+ timestamp date DEFAULT NULL,
+ framework_id varchar(255) DEFAULT NULL,
+ stars_count int(11) DEFAULT NULL,
+ contributors_count int(11) DEFAULT NULL,
+ forks_count int(11) DEFAULT NULL,
+ watchers_count int(11) DEFAULT NULL
+ );
+CREATE TABLE timestamps (
+timestamp date NOT NULL
+ );
+```
 
- `timestamp` date NOT NULL
- 
-);
 
 - **API and backend:** The API written in Node.js in the framework “Express”. It is responsible for writing and retracting data from the database.  It uses the packet “mysql” to communicate with the database. The usage of this npm packet comes in handy for numerous reasons, like security, since the queries processed with it are checked for SQL injections.
 
