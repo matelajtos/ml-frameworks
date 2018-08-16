@@ -11,9 +11,9 @@
   
 #### 1.2 Opportunities for developing the project
   
-  -Display frameworks descending order in a visually pleasing manner.
-  -Finer scoring system.
-  -ML grouping by types.
+  - Display frameworks descending order in a visually pleasing manner.
+  - Finer scoring system. 
+  - ML grouping by types.
   
   
   
@@ -39,7 +39,6 @@ The project uses a number of different tools to work properly:
 
   - [Python 3.6](https://www.python.org/) - Python programming language.
   - [Bit Bucket] (https://bitbucket.org/miamanoteam/ml-frameworks/src/master/ and https://bitbucket.org/miamanoteam/framework-       collector/src/master/)-Version control system.  Every script and database is contained in a Bit Bucket repository. 
-  - [GitHub API](https://developer.github.com/v3/) - Accessing stats.
   - [Google Sheets API](https://developers.google.com/sheets/api/v3/) - Creating quick and easy Google spreadsheets. 
   - [D3.js](https://d3js.org/) - Vizualization of data.  
   - [Azure functions](https://azure.microsoft.com/en-in/overview/serverless-computing/) - Azure cloud where the script will be running.
@@ -50,58 +49,97 @@ The project uses a number of different tools to work properly:
   
 ### Architecture
 
-There is a Python script **Collector** in our Azure account. It queries the current values and names of libraries from GitHub API once a week. It is unnecessary to query data every day, because it makes the downloading time longer and visualization works also properly on this way.  
+The project has two major parts both running on **Microsoft Azure**.
 
-_Framework-collector link:_ https://bitbucket.org/miamanoteam/framework-collector/src/master/
+- The first one, called the **“collector”** is in charge of gathering the information that is needed for calculating the scores for each framework in the given moment. 
 
-There is also a Web Application in Azure account which contains the **frontend**. Trends are visualized here.
+- The second part is a **web app**, that consist of a database with all the previously recorded data, an API providing access for the database and the frontend, that visualizes the findings.
+
+## Collector
+
+The **collector** is a Python script, running on an Azure function app. Every time it runs, it records the data needed for calculating the scores and uploads it to the database. The process goes as follows:
+
+- The fuction app containing the script of the collector is triggered by another function app, which had to be put in place because in Azure Python function apps not yet come with the feature enabling them to be scheduled in a cron-like way.
+
+- The script accesses a list consisting all the names of the **GitHub** repositories that we gather data about.
+
+Code snippet:
+
+[
+
+https://github.com/BVLC/caffe,
+
+https://github.com/opencv/opencv,
+
+https://github.com/tensorflow/tensorflow,
+
+https://github.com/scikit-learn/scikit-learn,
+
+https://github.com/keras-team/keras,
+
+...
+]
+
+- Using a **GitHub** module for Python the script gets the data about the certain repository. **GitHub** has its own API, although working directly with it provided good enough results, later we started using the github module for Python as a “middleware”, because it had proven to be easier and more stable.
+
+	Code snippet:
+	pip install github
+	
+- The data is then structured, so that it could be sent via a post request to the following access point of the API: 
+
+Code snippet:
+https://ml-frmwks.azurewebsites.net/api/insert
+
+About authentication details could be found under the part concerning the API.	
+
+## Web App
+
+- **Database:** The project uses a MySql database that is included into the Azure web app, the project does not have its own SQL server, that has its pros and cons. The database has the following table structures:
+
+Code snippet:
+CREATE TABLE `frameworks` (
+ `id` varchar(255) NOT NULL,
+ 
+ `url` varchar(255) DEFAULT NULL,
+ 
+ `name` varchar(255) DEFAULT NULL,
+ 
+ `repo_desc` text
+ 
+);
+
+CREATE TABLE `snapshots` (
+ `id` int(11) NOT NULL,
+ 
+ `timestamp` date DEFAULT NULL,
+ 
+ `framework_id` varchar(255) DEFAULT NULL,
+ 
+ `stars_count` int(11) DEFAULT NULL,
+ 
+ `contributors_count` int(11) DEFAULT NULL,
+ 
+ `forks_count` int(11) DEFAULT NULL,
+ 
+ `watchers_count` int(11) DEFAULT NULL
+ 
+);
+
+CREATE TABLE `timestamps` (
+
+ `timestamp` date NOT NULL
+ 
+);
+
+- **API and backend:** The API written in Node.js in the framework “Express”. It is responsible for writing and retracting data from the database.  It uses the packet “mysql” to communicate with the database. The usage of this npm packet comes in handy for numerous reasons, like security, since the queries processed with it are checked for SQL injections.
+
+The endpoints and features of the API are documented in a standalone documentation on Swagger, that is specialized for API documentation and endpoint testing. Check it out on www.ml-frmwks.azurewebsites.net/api
+
+The site has a lightweight backend also written in node.js, yet somewhat separated from the API parts. Other than handling the requests towards the site, some settings for the site improving security is implemented in the backend.
+
+- **Frontend:** The frontend of the web app is written in html and javascript. Graphs and charts are made with D3.js, a javascript library for data visualization.
+
 
 _Frontend link_: http://ml-frmwks.azurewebsites.net
 
-## Functions of frontend
 
-
-
-
-
-
-
-#### GitHub API:
-  - The API can be accessed by the following URL: [https://api.github.com/](https://api.github.com/).
-  - For accessing the **name**, **star**, **watch**, **fork** and **license** information of a repository through the API, simple [GET requests](https://developer.github.com/v3/repos/#get) can be used without any parameters.  
-    ```
-    GET /repos/:owner/:repo
-    ```
-    The returned JSON formatted dictionary contains the project name as _'name'_ and also the stats under the names _'stargazers_count'_, _'subscribers_count'_, _'forks_count'_ respectively.
-  - In order to access the number of **contributors** the same method cannot be applied, since the API doesn't have a functionality for it.
-  To get the number [pagination](https://developer.github.com/v3/guides/traversing-with-pagination/) can be used as shown in [this](https://stackoverflow.com/a/44347632) StackOverflow answer:  
-  > When we use pagination, we get some information in the Response Header about the total amount of pages according to how many items per page we are requesting (using the per_page parameter).
-  >
-  >So a trick could be requesting the list of contributors with one item per page:
-  >
-  >https://<i></i>api.github.com/repos/:owner/:repo/contributors?per_page=1
-  >doing this in our Response Header there will be a Link property with the following content:
-  >
-  >Link:https://<i></i>api.github.com/repositories/ID/contributors?per_page=1&page=2; rel="next", https://<i></i>api.github.com/repositories/ID/contributors?per_page=1&page=XXXXXXXX; rel="last"
-  >
-  >the XXXXXXXX value, just before rel="last" will be the total amount of pages, but since we are requesting one item per page, it will be also the total amount of contributors.
-  >
-  >[~ShinDarth](https://stackoverflow.com/users/3497671/shindarth)
-  
-  - Using only this method, developers who committed anonymously will not be counted. For that the _anon_ parameter has to be set to 1.
-  
-    Full example with Tensorflow:  
-    ```
-    https://api.github.com/repos/tensorflow/tensorflow/contributors?per_page=1&anon=1
-    ```
-
-  - [API rate limit](https://developer.github.com/v3/#rate-limiting): Without authentication the API lets at most 60 requests through an hour. With authentication the limit is increased to
-    5000 request/hour. While 60 is not necessarily enough, 5000 should do the trick. For this, a shared GitHub account is required.  
-  - **Authentication**: The recommended way is using the [OAuth](https://developer.github.com/v3/oauth_authorizations/#oauth-authorizations-api) protocol. For the time being we are going to use
-    some other [authentication method](https://developer.github.com/v3/auth/#other-authentication-methods) for testing purposes, since the app is not yet running.
-	It is possible to use both _username:password_ and _username:token_ combinations. Out of the last two, token based authentication should be prioritized, because using that the access scope can be set precisely.  
-    The [Requests](http://docs.python-requests.org/en/master/) package supports an _'auth'_ parameter in every kind of request which expects a tuple containing a _usnername_ and a _password_.
-  - **Webhooks:** [Webhooks](https://developer.github.com/v3/repos/hooks/) are available through the API and they should be used as a trigger to the script running on the Azure servers to update the database containing the scores for the frameworks.  Authentication is mandatory when using webhooks. 
-  	- [List hooks](https://developer.github.com/v3/repos/hooks/#list-hooks): ``` GET /repos/:owner/:repo/hooks```
-  	- [Get single hook](https://developer.github.com/v3/repos/hooks/#get-single-hook): ``` GET /repos/:owner/:repo/hooks/:id```
-  	- [Create hook](https://developer.github.com/v3/repos/hooks/#create-a-hook): ```POST /repos/:owner/:repo/hooks``` (check link for details)
