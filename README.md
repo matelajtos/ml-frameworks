@@ -149,12 +149,13 @@ The site has a lightweight backend also written in node.js, yet somewhat separat
 
 
 ![](https://ml-frmwks.azurewebsites.net/doc_pics/Picture_frontend_1.png)
-
+<p align="center">
+	
 _Popularity of tools and frameworks are visualized with bubbles_
 
-<p align="center">
 
-![](https://ml-frmwks.azurewebsites.net/doc_pics/Picture_frontend_2.png) ![](https://ml-frmwks.azurewebsites.net/doc_pics/Picture_frontend_3.png)
+
+![](https://ml-frmwks.azurewebsites.net/doc_pics/Picture_frontend_2.png)       ![](https://ml-frmwks.azurewebsites.net/doc_pics/Picture_frontend_3.png)
 
 _You can check the historical popularity and fork, watch star and contributor numbers of every tool and framework_
 
@@ -170,6 +171,9 @@ _You can check the historical popularity and fork, watch star and contributor nu
 ![](https://ml-frmwks.azurewebsites.net/doc_pics/Picture_frontend_5.png)
 _Trend_
 
+
+![](https://ml-frmwks.azurewebsites.net/doc_pics/graf_modositott.jpg)
+_Architecture of the project_
 
 
 _Frontend link_: http://ml-frmwks.azurewebsites.net
